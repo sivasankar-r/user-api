@@ -2,6 +2,8 @@ package com.sivasankar.userapi.rest;
 
 import java.util.List;
 
+import javax.naming.OperationNotSupportedException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,9 +37,9 @@ public class UserController {
 		return userService.getAllUsers();
 	}
 
-	@RequestMapping("/users/{name}")
-	public User fetchUser(@PathVariable String name) {
-		return userService.getUser(name);
+	@RequestMapping("/users/{id}")
+	public User fetchUser(@PathVariable String id) {
+		return userService.getUser(id);
 	}
 
 	@RequestMapping(value = "/users", method = RequestMethod.POST)
@@ -63,8 +65,9 @@ public class UserController {
 		HttpStatus status = null;
 		try {
 			userService.updateUser(user);
+			response.setResMsg("User updated successfully");
 			status = HttpStatus.OK;
-		} catch (UserNotFoundException e) {
+		} catch (Exception e) {
 			response.setResMsg(e.getMessage());
 			status = HttpStatus.BAD_REQUEST;
 		}
@@ -72,7 +75,18 @@ public class UserController {
 	}
 
 	@RequestMapping(value="/users", method = RequestMethod.DELETE)
-	public void deleteUser(@RequestParam(name="id", required=true) String id) {
-		userService.deleteUser(id);
+	public ResponseEntity<ServiceResponseTo> deleteUser(@RequestParam(name="id", required=true) String id) {
+		ServiceResponseTo response = new ServiceResponseTo();
+		response.setUserId(id);
+		HttpStatus status = null;
+		try {
+			userService.deleteUser(id);
+			response.setResMsg("User deleted successfully");
+			status = HttpStatus.OK;
+		} catch (Exception e) {
+			response.setResMsg(e.getMessage());
+			status = HttpStatus.BAD_REQUEST;
+		}
+		return new ResponseEntity<ServiceResponseTo>(response, status);
 	}
 }

@@ -3,6 +3,8 @@ package com.sivasankar.userapi.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.naming.OperationNotSupportedException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -41,10 +43,18 @@ public class UserService {
 		userRepository.save(user);
 	}
 
-	public void updateUser(User user) throws UserNotFoundException {
+	public void updateUser(User user) throws UserNotFoundException, OperationNotSupportedException {
 		User existingUser = userRepository.findOne(user.getId());
 		if(existingUser == null) {
 			throw new UserNotFoundException("User not found for the input userId");
+		}
+		
+		if(!existingUser.getEmail().equals(user.getEmail())) {
+			throw new OperationNotSupportedException("Can only update pincode or birth date. Email updation not allowed.");
+		}
+		
+		if(!existingUser.getfName().equals(user.getfName()) || !existingUser.getlName().equals(user.getlName())) {
+			throw new OperationNotSupportedException("Can only update pincode or birth date. First Name or Last Name updation not allowed");
 		}
 		userRepository.save(user);
 	}
